@@ -21,7 +21,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
   @override
   Widget build(BuildContext context) {
     final eventProvider = Provider.of<EventProvider>(context);
-    final attendees = eventProvider.eventAttendees[widget.event.title] ?? [];
+    final attendees = eventProvider.eventAttendees[widget.event.title];
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.event.title)),
@@ -32,18 +32,18 @@ class _EventDetailPageState extends State<EventDetailPage> {
           children: [
             Text('Date: ${widget.event.date}',
                 style: const TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(widget.event.description,
                 style: const TextStyle(fontSize: 16)),
-            SizedBox(height: 16),
-            Text('RSVP Form',
+            const SizedBox(height: 16),
+            const Text('RSVP Form',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             Form(
               key: _formKey,
               child: Column(
                 children: [
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Name'),
+                    decoration: const InputDecoration(labelText: 'Name'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your name';
@@ -51,11 +51,11 @@ class _EventDetailPageState extends State<EventDetailPage> {
                       return null;
                     },
                     onSaved: (value) {
-                      _name = value ?? '';
+                      _name = value!;
                     },
                   ),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Email'),
+                    decoration: const InputDecoration(labelText: 'Email'),
                     validator: (value) {
                       if (value == null ||
                           value.isEmpty ||
@@ -65,36 +65,36 @@ class _EventDetailPageState extends State<EventDetailPage> {
                       return null;
                     },
                     onSaved: (value) {
-                      _email = value ?? '';
+                      _email = value!;
                     },
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState!.save();
                         eventProvider.rsvp(widget.event.title, _name, _email);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                          const SnackBar(
                               content: Text('RSVP submitted successfully')),
                         );
                       }
                     },
-                    child: Text('Submit'),
+                    child: const Text('Submit'),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 20),
-            Text('Attendees:', style: TextStyle(fontSize: 18)),
+            const SizedBox(height: 20),
+            const Text('Attendees:', style: TextStyle(fontSize: 18)),
             Expanded(
               child: ListView.builder(
-                itemCount: attendees.length,
+                itemCount: attendees!.length,
                 itemBuilder: (context, index) {
                   final attendee = attendees[index];
                   return ListTile(
-                    title: Text(attendee['name'] ?? ''),
-                    subtitle: Text(attendee['email'] ?? ''),
+                    title: Text(attendee['name']!),
+                    subtitle: Text(attendee['email']!),
                   );
                 },
               ),

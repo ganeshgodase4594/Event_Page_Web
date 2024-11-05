@@ -6,11 +6,9 @@ import '../services/eventmodel.dart';
 
 class EventProvider with ChangeNotifier {
   List<Event> _events = [];
-  // Ensure this map exists in the EventProvider class
   final Map<String, List<Map<String, String>>> _eventAttendees = {};
 
   List<Event> get events => _events;
-  // This is the getter for _eventAttendees
   Map<String, List<Map<String, String>>> get eventAttendees => _eventAttendees;
 
   EventProvider() {
@@ -28,7 +26,7 @@ class EventProvider with ChangeNotifier {
           date: '2024-11-15',
           description: 'Discuss Dart features.'),
     ];
-    // Initialize an empty list for attendees for each event
+
     for (var event in _events) {
       _eventAttendees[event.title] = [];
     }
@@ -36,6 +34,13 @@ class EventProvider with ChangeNotifier {
   }
 
   Future<void> rsvp(String eventName, String name, String email) async {
+    // Basic validation before making the API call
+    if (name.isEmpty ||
+        email.isEmpty ||
+        !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+      throw Exception('Please provide a valid name and email.');
+    }
+
     try {
       final response = await http.post(
         Uri.parse('https://jsonplaceholder.typicode.com/posts'),
@@ -48,14 +53,23 @@ class EventProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 201) {
-        // Add the RSVP entry to the specific event's attendees list
         _eventAttendees[eventName]?.add({'name': name, 'email': email});
         notifyListeners();
+      } else if (response.statusCode == 400) {
+        throw Exception('Bad request. Please check the data.');
       } else {
-        throw Exception('Failed to RSVP.');
+        throw Exception('Failed to RSVP. Status code: ${response.statusCode}');
       }
     } catch (error) {
-      debugPrint('Error: $error');
+      // handle network error ....
+      if (error is http.ClientException) {
+        debugPrint('Network error: $error');
+        throw Exception('Network error. Please check your connection.');
+      } else {
+        debugPrint('Unexpected error: $error');
+        throw Exception(
+            'An unexpected error occurred. Please try again later.');
+      }
     }
   }
 }
